@@ -15,6 +15,7 @@ class ProfessorExplorationController{
         const department = query.department;
         const ranklow = query.ranklow;
         const rankhigh = query.rankhigh;
+        const studentInterests = query.studentInterests;
         let q = "SELECT DISTINCT users.username, users.name, uniname, professor.personalweblink, university.link FROM university inner join department on university.name = department.uniname inner join professor on department.dept_id = professor.deptid inner join users on professor.username = users.username inner join interests on professor.username = interests.username WHERE 1=1";
         if (country !== '') {
             q += ' AND university.country = "' + country + '"';
@@ -36,8 +37,13 @@ class ProfessorExplorationController{
             let upperlimit = parseInt(rankhigh);
             q += ' AND university.ranking <= ' + upperlimit;
         }
-        if (field !== '') {
-            q += ' AND interests.interestfield = "' + field + '"';
+        if (studentInterests.length !== 0) {
+            let interestString = '(';
+            for (let i = 0; i < studentInterests.length - 1; i++) {
+                interestString += "'" + studentInterests[i] + "', ";
+            }
+            interestString += "'" + studentInterests[studentInterests.length - 1] + "')";
+            q += ' AND interests.interestfield IN ' + interestString;
         }
         //console.log(q);
         db.query(q, (err, data) => {

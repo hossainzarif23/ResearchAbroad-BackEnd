@@ -28,6 +28,7 @@ class RecommendationController{
         const department = query.department;
         const ranklow = query.ranklow;
         const rankhigh = query.rankhigh;
+        const studentInterests = query.studentInterests;
         let q = "SELECT DISTINCT users.username, users.name, uniname, professor.personalweblink, university.link, department.deptname FROM university inner join department on university.name = department.uniname inner join professor on department.dept_id = professor.deptid inner join users on professor.username = users.username inner join interests on professor.username = interests.username WHERE 1=1";
         if (country !== '') {
             q += ' AND university.country = "' + country + '"';
@@ -49,11 +50,16 @@ class RecommendationController{
             let upperlimit = parseInt(rankhigh);
             q += ' AND university.ranking <= ' + upperlimit;
         }
-        if (field === '') {
+        if (studentInterests.length === 0) {
             q += ' AND interests.interestfield IN (SELECT interestfield FROM interests WHERE username = "' + username + '")';
         }
         else {
-            q += ' AND interests.interestfield = "' + field + '"';
+            let interestString = '(';
+            for (let i = 0; i < studentInterests.length - 1; i++) {
+                interestString += "'" + studentInterests[i] + "', ";
+            }
+            interestString += "'" + studentInterests[studentInterests.length - 1] + "')";
+            q += ' AND interests.interestfield IN ' + interestString;
         }
         db.query(q, [username], (err, data) => {
             if (err) {
@@ -64,11 +70,9 @@ class RecommendationController{
             }
             responses.responseCode = 1;
             responses.responseText = "Recommendation Successful";
-            //shuffleArray(data);
             for (let i = 0; i < data.length; i++) {
                 let x = Math.floor((Math.random() * 50) + 50);
                 data[i].matching = x;
-                //console.log(data[i]);
             }
             data.sort(function(a, b){return b.matching - a.matching});
             responses.tuples = data;

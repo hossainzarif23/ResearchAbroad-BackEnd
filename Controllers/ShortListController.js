@@ -63,7 +63,12 @@ class ShortListController{
             }
             responses.responseCode = 1;
             responses.responseText = "Sending ShorLists";
-            console.log(data);
+            //console.log(data);
+            for (let i = 0; i < data.length; i++) {
+                let x = Math.floor((Math.random() * 50) + 50);
+                data[i].matching = x;
+            }
+            data.sort(function(a, b){return b.matching - a.matching});
             responses.shortlists = data;
             return res.json(responses);
         })
