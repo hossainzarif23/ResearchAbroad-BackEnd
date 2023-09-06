@@ -52,6 +52,22 @@ class ShortListController{
             return res.json(responses);
         })
     }
+    getShortLists = async(req, res) => {
+        let responses = {};
+        db.query(shortListQueries.getShortListsByUsername, [req.body.username], (err, data) => {
+            if (err) {
+                responses.responseCode = -1;
+                responses.responseText = "Internal Database Error";
+                responses.errorMessage = err.message;
+                return res.json(responses);
+            }
+            responses.responseCode = 1;
+            responses.responseText = "Sending ShorLists";
+            console.log(data);
+            responses.shortlists = data;
+            return res.json(responses);
+        })
+    }
 }
 
 export default ShortListController;
